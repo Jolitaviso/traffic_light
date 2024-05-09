@@ -39,55 +39,42 @@ def find_green_active_times(file_path):
     return green_active_times
 
 def count_complete_cycles(file_path):
-    complete_cycle_count = 0
-    last_color = None
-
+    
     with open(file_path, 'r') as file:
-        next(file)
-        for line in file:
-            data = line.strip().split(',')
-            current_color = data[:3]
-
-            if last_color:
-                # cycle
-                if current_color == ['0', '1', '0'] and last_color == ['1', '0', '0']:
-                    complete_cycle_count += 1
-
-            last_color = current_color
-
-    print("Complete cycles:", complete_cycle_count)
+        data = [line.strip().split(',')[:3] for line in file.readlines()]
+        
+    complete_cycle_count = 0
+      
+    for i in range(len(data)):
+        if data[i]== ['1','0','0'] and \
+            data[(i+1) % len(data)] == ['0', '1', '0'] and \
+            data[(i+2) % len(data)] == ['0', '0', '1'] and \
+            data[(i+3) % len(data)] == ['0', '1', '0'] and \
+            data[(i+4) % len(data)] == ['1', '0', '0']:
+                complete_cycle_count += 1
 
     return complete_cycle_count
 
 def count_lines_with_errors(file_path):
     error_count = 0
-    multi_color_errors = 0
-    no_color_errors = 0
-    
+
     with open(file_path, 'r') as file:
         next(file)  
-        for line in file:
+        for line_num, line in enumerate(file, start=2):
             data = line.strip().split(',')
             active_colors = sum(int(color) for color in data[:3])
 
-            if active_colors != 1: # all error
+            if active_colors != 1:
+                """print(f"Line with errors {line_num}: {line.strip()}")""" #We can check the error lines
                 error_count += 1
 
-            if active_colors > 1:
-                multi_color_errors += 1 
-            
-            if active_colors == 0:
-                no_color_errors += 1
-
     print("Lines with errors:", error_count)
-    print("Lines with mutiple colors:", multi_color_errors)
-    print("Lines with no colors:", no_color_errors)
-    
-    return error_count, multi_color_errors, no_color_errors
+ 
+    return error_count
 
 file_path = 'data.txt' 
 
-print("1. Find the number of red, yellow and green occurrences:")
+print("1.Find the number of RED, YELLOW and GREEN occurrences:")
 color_occurrences = count_color_occurrences(file_path)
 print("Color occurrences:", color_occurrences)
 
@@ -95,12 +82,13 @@ print("\n2. Find how long each colour was active for:")
 color_times = calculate_color_active_time(file_path)
 print("Color active times:", color_times)
 
-print("\n3. Find all times when Green was active (by time):")
+print("\n3. Find all times when GREEN was active (by time):")
 green_active_times = find_green_active_times(file_path)
 
-print("\n4. Find the number of complete cycles Red-Yellow-Green-Yellow-Red in the data:")
+print("\n4. Find the number of complete cycles RED-YELLOW-GREEN-YELLOW-RED in the data:")
 cycle_count = count_complete_cycles(file_path)
+print("RED-YELLOW-GREEN-YELLOW-RED cycles:", cycle_count)
 
-print("\n5. Find number of lines with mistakes (multiple colours active at the same time or no colours active):")
-error_count, multi_color_errors, no_color_errors = count_lines_with_errors(file_path)
+print("\n5. Find number of lines with mistakes:")
+error_count = count_lines_with_errors(file_path)
 
